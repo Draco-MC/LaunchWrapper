@@ -1,20 +1,37 @@
+/*
+!!!NOTICE!!!
+This is a modified version of Enaium's LaunchWrapper, specifically a modified version of the Launch class.
+This class was modified because the URL finder on the unmodified version assumed that the user was using Microsoft Windows.
+This is a problem for me since my operating system is Arch Linux, so I changed this so people who use macOS or Linux can use VulpesLoader.
+Although it doesn't appear as if it's under a license, I decided to provide attribution anyway.
+The original class can be found here: https://github.com/Enaium/LaunchWrapper/blob/master/src/main/java/net/minecraft/launchwrapper/Launch.java
+ */
+
 package net.minecraft.launchwrapper;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
+import java.applet.Applet;
+import java.applet.AppletStub;
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.util.List;
 
 import org.apache.logging.log4j.Level;
 
+import javax.swing.*;
+
 public class Launch {
-    private static final String DEFAULT_TWEAK = "net.minecraft.launchwrapper.template.TemplateTweaker";
+    private static final String DEFAULT_TWEAK = "sh.talonfox.vulpesloader.bootstrap.MinecraftClientBootstrap";
     public static File minecraftHome;
     public static File assetsDir;
     public static Map<String, Object> blackboard;
@@ -135,11 +152,114 @@ public class Launch {
 
             // Finally, we turn to the primary tweaker, and let it tell us where to go to launch
             final String launchTarget = primaryTweaker.getLaunchTarget();
-            final Class<?> clazz = Class.forName(launchTarget, false, classLoader);
-            final Method mainMethod = clazz.getMethod("main", String[].class);
+            if(launchTarget.endsWith("Applet")) {
+                final Map<String, String> params = new HashMap<String, String>();
 
-            LogWrapper.info("Launching wrapped minecraft {%s}", launchTarget);
-            mainMethod.invoke(null, (Object) argumentList.toArray(new String[0]));
+                String name = "Player" + System.currentTimeMillis() % 1000;
+                if (args.length > 0) name = args[0];
+
+                String sessionId = "-";
+                if (args.length > 1) sessionId = args[1];
+
+                params.put("username", name);
+                params.put("sessionid", sessionId);
+
+                final Class<?> clazz = Class.forName(launchTarget, false, classLoader);
+
+                LogWrapper.info("Launching wrapped minecraft applet {%s}", launchTarget);
+                Applet applet = (Applet)clazz.getDeclaredConstructor().newInstance();
+
+                final Frame launcherFrameFake = new Frame();
+                launcherFrameFake.setTitle("Minecraft");
+                launcherFrameFake.setBackground(Color.BLACK);
+
+                final JPanel panel = new JPanel();
+                launcherFrameFake.setLayout(new BorderLayout());
+                panel.setPreferredSize(new Dimension(854, 480));
+                launcherFrameFake.add(panel, BorderLayout.CENTER);
+                launcherFrameFake.pack();
+
+                launcherFrameFake.setLocationRelativeTo(null);
+                launcherFrameFake.setVisible(true);
+
+                launcherFrameFake.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        System.exit(1);
+                    }
+                });
+
+                class LauncherFake extends Applet implements AppletStub {
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public void appletResize(int width, int height) {
+
+                    }
+
+
+                    @Override
+                    public boolean isActive() {
+                        return true;
+                    }
+
+                    @Override
+                    public URL getDocumentBase() {
+                        try {
+                            return new URL("http://www.minecraft.net/game/");
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public URL getCodeBase() {
+                        try {
+                            return new URL("http://www.minecraft.net/game/");
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public String getParameter(String paramName) {
+                        if (params.containsKey(paramName)) {
+                            return params.get(paramName);
+                        }
+                        System.err.println("Client asked for parameter: " + paramName);
+                        return null;
+                    }
+                }
+
+                final LauncherFake fakeLauncher = new LauncherFake();
+                applet.setStub(fakeLauncher);
+
+                fakeLauncher.setLayout(new BorderLayout());
+                fakeLauncher.add(applet, BorderLayout.CENTER);
+                fakeLauncher.validate();
+
+                launcherFrameFake.removeAll();
+                launcherFrameFake.setLayout(new BorderLayout());
+                launcherFrameFake.add(fakeLauncher, BorderLayout.CENTER);
+                launcherFrameFake.validate();
+
+                applet.init();
+                applet.start();
+
+                Runtime.getRuntime().addShutdownHook(new Thread() {
+                    public void run() {
+                        applet.stop();
+                    }
+                });
+            } else {
+                final Class<?> clazz = Class.forName(launchTarget, false, classLoader);
+                final Method mainMethod = clazz.getMethod("main", String[].class);
+
+                LogWrapper.info("Launching wrapped minecraft {%s}", launchTarget);
+                mainMethod.invoke(null, (Object) argumentList.toArray(new String[0]));
+            }
         } catch (Exception e) {
             LogWrapper.log(Level.ERROR, e, "Unable to launch");
             System.exit(1);

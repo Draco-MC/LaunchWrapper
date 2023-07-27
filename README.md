@@ -1,15 +1,8 @@
 # LaunchWrapper
-Classloader with bytecode transforming functionality,Forked from https://github.com/Mojang/LegacyLauncher
 
-[![Maven metadata URL](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fmaven.enaium.cn%2Fcn%2Fenaium%2Flaunchwrapper%2Fmaven-metadata.xml&style=for-the-badge)](https://maven.enaium.cn/)
+LaunchWrapper is a fork of https://github.com/Enaium/LaunchWrapper (which is a fork of Mojang's LegacyLauncher: https://github.com/Mojang/LegacyLauncher)
+  
+It provides classloading functionality allowing mixins to be applied to Minecraft's bytecode. This enables runtime modification of Minecraft's code
+without having to patch the source code, making it easier to redistribute open source mods (though ARR mods can also benefit from this)
 
-## Gradle
-```groovy
-repositories {
-    maven { url 'https://maven.enaium.cn/' }
-}
-
-dependencies {
-    implementation("cn.enaium:launchwrapper:<VERSION>")
-}
-```
+LaunchWrapper is required for VulpesLoader to properly function, without it, the mod loader will not work.
