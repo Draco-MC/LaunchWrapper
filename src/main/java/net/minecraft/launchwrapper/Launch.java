@@ -31,7 +31,7 @@ import org.apache.logging.log4j.Level;
 import javax.swing.*;
 
 public class Launch {
-    private static final String DEFAULT_TWEAK = "sh.talonfox.vulpesloader.bootstrap.MinecraftClientBootstrap";
+    private static final String DEFAULT_TWEAK = "sh.talonfloof.dracoloader.bootstrap.MinecraftServerBootstrap";
     public static File minecraftHome;
     public static File assetsDir;
     public static Map<String, Object> blackboard;
