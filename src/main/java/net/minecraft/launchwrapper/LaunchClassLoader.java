@@ -98,7 +98,7 @@ public class LaunchClassLoader extends URLClassLoader {
         try {
             transformers.add(transformerClass);
         } catch (Exception e) {
-            LogWrapper.log(Level.ERROR, e, "A critical problem occurred registering the ASM transformer class %s", transformerClass.class.getName());
+            LogWrapper.log(Level.ERROR, e, "A critical problem occurred registering the ASM transformer class %s", transformerClass.getClass().getName());
         }
     }
 
