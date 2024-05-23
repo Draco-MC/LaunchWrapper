@@ -62,6 +62,7 @@ public class LaunchClassLoader extends URLClassLoader {
         addClassLoaderExclusion("ch.qos.logback");
         addClassLoaderExclusion("sh.talonfloof.dracoloader.");
         addClassLoaderExclusion("com.formdev.");
+        addClassLoaderExclusion("kotlin.");
 
         // transformer exclusions
         addTransformerExclusion("javax.");
@@ -73,6 +74,7 @@ public class LaunchClassLoader extends URLClassLoader {
         addTransformerExclusion("net.minecraft.launchwrapper.template.");
         addTransformerExclusion("sh.talonfloof.dracoloader.");
         addTransformerExclusion("com.formdev.");
+        addTransformerExclusion("kotlin.");
 
         if (DEBUG_SAVE) {
             int x = 1;
