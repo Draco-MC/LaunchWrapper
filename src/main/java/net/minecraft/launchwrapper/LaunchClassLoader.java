@@ -94,6 +94,14 @@ public class LaunchClassLoader extends URLClassLoader {
         }
     }
 
+    public void registerTransformer(IClassTransformer transformerClass) {
+        try {
+            transformers.add(transformerClass);
+        } catch (Exception e) {
+            LogWrapper.log(Level.ERROR, e, "A critical problem occurred registering the ASM transformer class %s", transformerClassName);
+        }
+    }
+
     @Override
     public Class<?> findClass(final String name) throws ClassNotFoundException {
         if (invalidClasses.contains(name)) {
