@@ -60,6 +60,8 @@ public class LaunchClassLoader extends URLClassLoader {
         addClassLoaderExclusion("net.minecraft.launchwrapper.");
         addClassLoaderExclusion("org.slf4j");
         addClassLoaderExclusion("ch.qos.logback");
+        addClassLoaderExclusion("sh.talonfloof.dracoloader.");
+        addClassLoaderExclusion("com.formdev.");
 
         // transformer exclusions
         addTransformerExclusion("javax.");
@@ -69,6 +71,8 @@ public class LaunchClassLoader extends URLClassLoader {
         addTransformerExclusion("org.bouncycastle.");
         addTransformerExclusion("org.bouncycastle.");
         addTransformerExclusion("net.minecraft.launchwrapper.template.");
+        addTransformerExclusion("sh.talonfloof.dracoloader.");
+        addTransformerExclusion("com.formdev.");
 
         if (DEBUG_SAVE) {
             int x = 1;
