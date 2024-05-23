@@ -1,5 +1,6 @@
 package net.minecraft.launchwrapper;
 
+import java.awt.*;
 import java.io.*;
 import java.net.JarURLConnection;
 import java.net.URL;
@@ -8,6 +9,7 @@ import java.net.URLConnection;
 import java.security.CodeSigner;
 import java.security.CodeSource;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
@@ -15,8 +17,11 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import com.formdev.flatlaf.FlatDarculaLaf;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
+
+import javax.swing.*;
 
 public class LaunchClassLoader extends URLClassLoader {
     public static final int BUFFER_SIZE = 1 << 12;
@@ -281,7 +286,14 @@ public class LaunchClassLoader extends URLClassLoader {
             LogWrapper.finest("Ending transform of {%s (%s)} Start Length: %d", name, transformedName, (basicClass == null ? 0 : basicClass.length));
         } else {
             for (final IClassTransformer transformer : transformers) {
-                basicClass = transformer.transform(name, transformedName, basicClass);
+                try {
+                    basicClass = transformer.transform(name, transformedName, basicClass);
+                } catch(Exception e) {
+                    GraphicsEnvironment.isHeadless(); // Hack used to fix a weird issue where it thinks our environment is headless
+                    FlatDarculaLaf.setup();
+                    JOptionPane.showMessageDialog(null, "An error occurred while transforming "+name+" (from "+transformer.getClass().getName()+"): "+e.getMessage()+"\n\nThe game will now exit", "Draco Mod Loader", JOptionPane.ERROR_MESSAGE);
+                    System.exit(1);
+                }
             }
         }
         return basicClass;
