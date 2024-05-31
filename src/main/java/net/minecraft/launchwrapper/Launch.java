@@ -45,12 +45,23 @@ public class Launch {
     private Launch() {
         //Get classpath
         List<URL> urls = new ArrayList<>();
+        URL url = null;
+        try {
+            String f = getClass().getClassLoader().getResource("a.class").getFile();
+            url = new URL(f.substring(0, f.indexOf("!/")));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        URL finalUrl = url;
         if (getClass().getClassLoader() instanceof URLClassLoader) {
             Collections.addAll(urls, ((URLClassLoader) getClass().getClassLoader()).getURLs());
+            urls.removeIf((u) -> u.toString().equals(finalUrl.toString()));
         } else {
             for (String s : System.getProperty("java.class.path").split(File.pathSeparator)) {
                 try {
-                    urls.add(new File(s).toURI().toURL());
+                    if(!(new File(s).toURI().toURL()).toString().equals(finalUrl.toString())) {
+                        urls.add(new File(s).toURI().toURL());
+                    }
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 }
@@ -58,6 +69,7 @@ public class Launch {
         }
         classLoader = new LaunchClassLoader(urls.toArray(new URL[0]));
         blackboard = new HashMap<>();
+        blackboard.put("GameJar",finalUrl);
         Thread.currentThread().setContextClassLoader(classLoader);
     }
 
