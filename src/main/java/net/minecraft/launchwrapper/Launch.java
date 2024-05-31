@@ -47,7 +47,7 @@ public class Launch {
         List<URL> urls = new ArrayList<>();
         URL url = null;
         try {
-            String f = getClass().getClassLoader().getResource("a.class").getFile();
+            String f = getClass().getClassLoader().getResource("net/minecraft/server/MinecraftServer.class").getFile();
             url = new URL(f.substring(0, f.indexOf("!/")));
         } catch (MalformedURLException e) {
             e.printStackTrace();
